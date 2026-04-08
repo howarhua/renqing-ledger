@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: renqin-frontend
+  labels:
+    app: renqin-frontend
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: renqin-frontend
+  template:
+    metadata:
+      labels:
+        app: renqin-frontend
+    spec:
+      imagePullSecrets:
+        - name: acr-pull-secret
+      containers:
+        - name: renqin-frontend
+          image: REGISTRY_URL/FRONTEND_IMAGE_NAME:TAG
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always

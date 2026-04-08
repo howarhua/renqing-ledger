@@ -129,7 +129,7 @@ export default function GiftRecordForm({
             {amountPresets.map(a => (
               <div
                 key={a}
-                className={`cursor-pointer h-10 px-3 text-sm font-medium rounded-xl border leading-10 ${Number(amount) === a ? 'gradient-festive shadow-festive border-primary/20 text-primary-foreground' : 'border-border bg-transparent text-foreground hover:border-primary/40'}`}
+                className={`cursor-pointer h-10 px-3 text-sm font-medium rounded-xl border leading-none ${Number(amount) === a ? 'gradient-festive shadow-festive border-primary/20 text-primary-foreground' : 'border-border bg-transparent text-foreground hover:border-primary/40'} flex items-center justify-center`}
                 onClick={() => setAmount(a.toString())}
               >
                 ¥{a}
@@ -169,7 +169,7 @@ export default function GiftRecordForm({
           {giftPresets.map(g => (
             <div
               key={g}
-              className={`cursor-pointer h-10 px-3 text-sm font-medium rounded-xl border leading-10 ${selectedGifts.includes(g) ? 'gradient-festive shadow-festive border-primary/20 text-primary-foreground' : 'border-border bg-transparent text-foreground hover:border-primary/40'}`}
+              className={`cursor-pointer h-10 px-3 text-sm font-medium rounded-xl border leading-none ${selectedGifts.includes(g) ? 'gradient-festive shadow-festive border-primary/20 text-primary-foreground' : 'border-border bg-transparent text-foreground hover:border-primary/40'} flex items-center justify-center`}
               onClick={() => toggleGift(g)}
             >
               {g}
