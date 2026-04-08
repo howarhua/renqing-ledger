@@ -84,9 +84,9 @@ jobs:
 #          kubectl apply -f k8s/ingress.yaml
 
       - name: Wait for deployment
-        run: kubectl rollout status deployment/cashin-app --timeout=60s
+        run: kubectl rollout status deployment/renqin-app --timeout=60s
 
       - name: Verify deployment
         run: |
-          kubectl get pods -l app=cashin-app
-#          kubectl get ingress cashin-app
+          kubectl get pods -l app=renqin-app
+#          kubectl get ingress renqin-app
