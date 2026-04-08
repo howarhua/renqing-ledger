@@ -24,3 +24,5 @@ spec:
           ports:
             - containerPort: 8080
           imagePullPolicy: Always
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
