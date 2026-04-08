@@ -57,7 +57,7 @@ export default function GiftRecordForm({
   };
 
   const handleSubmit = () => {
-    if (!guestName.trim()) return;
+    if (!guestName.trim() || !Number(amount)) return;
     const data = {
       banquetId,
       guestName: guestName.trim(),
@@ -92,29 +92,17 @@ export default function GiftRecordForm({
         {isEditing ? '编辑记录' : '快速录入'}
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium">来宾姓名 *</Label>
+      <div className="space-y-1.5">
+          <Label className="text-sm font-medium h-6">来宾姓名 *</Label>
           <Input value={guestName} onChange={e => setGuestName(e.target.value)} placeholder="姓名" className="h-12 text-base rounded-xl" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium">礼金金额</Label>
-          <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0" className="h-12 text-base rounded-xl" />
-          <div className="flex flex-wrap gap-2 mt-2">
-            {amountPresets.map(a => (
-              <Badge
-                key={a}
-                variant={Number(amount) === a ? 'default' : 'outline'}
-                className={`cursor-pointer h-9 px-4 text-sm rounded-lg transition-all ${Number(amount) === a ? 'gradient-festive shadow-festive border-0 text-primary-foreground' : 'hover:border-primary/40 hover:text-primary'}`}
-                onClick={() => setAmount(a.toString())}
-              >
-                ¥{a}
-              </Badge>
-            ))}
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium h-6">礼金金额</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg">
-                  <Settings2 className="w-4 h-4" />
+                <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground text-xs rounded-lg">
+                  <Settings2 className="w-3.5 h-3.5" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 space-y-3 rounded-xl">
@@ -136,16 +124,27 @@ export default function GiftRecordForm({
               </PopoverContent>
             </Popover>
           </div>
+          <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0" className="h-12 text-base rounded-xl" />
+          <div className="flex flex-wrap gap-2 mt-2">
+            {amountPresets.map(a => (
+              <div
+                key={a}
+                className={`cursor-pointer h-10 px-3 text-sm font-medium rounded-xl border leading-10 ${Number(amount) === a ? 'gradient-festive shadow-festive border-primary/20 text-primary-foreground' : 'border-border bg-transparent text-foreground hover:border-primary/40'}`}
+                onClick={() => setAmount(a.toString())}
+              >
+                ¥{a}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">礼品</Label>
+          <Label className="text-sm font-medium h-6">礼品</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground text-xs rounded-lg">
-                <Settings2 className="w-3.5 h-3.5" /> 管理预设
+                <Settings2 className="w-3.5 h-3.5" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 space-y-3 rounded-xl">
@@ -168,14 +167,13 @@ export default function GiftRecordForm({
         </div>
         <div className="flex flex-wrap gap-2">
           {giftPresets.map(g => (
-            <Badge
+            <div
               key={g}
-              variant={selectedGifts.includes(g) ? 'default' : 'outline'}
-              className={`cursor-pointer h-10 px-5 text-sm rounded-xl transition-all ${selectedGifts.includes(g) ? 'gradient-gold shadow-gold border-0 text-primary-foreground' : 'hover:border-secondary/40 hover:text-secondary'}`}
+              className={`cursor-pointer h-10 px-3 text-sm font-medium rounded-xl border leading-10 ${selectedGifts.includes(g) ? 'gradient-festive shadow-festive border-primary/20 text-primary-foreground' : 'border-border bg-transparent text-foreground hover:border-primary/40'}`}
               onClick={() => toggleGift(g)}
             >
               {g}
-            </Badge>
+            </div>
           ))}
         </div>
         <div className="flex gap-2">
@@ -193,12 +191,12 @@ export default function GiftRecordForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-sm font-medium">备注</Label>
+        <Label className="text-sm font-medium h-6">备注</Label>
         <Textarea value={note} onChange={e => setNote(e.target.value)} placeholder="关系/说明" className="text-base rounded-xl" rows={2} />
       </div>
 
       <div className="flex gap-3 pt-1">
-        <Button onClick={handleSubmit} className={`flex-1 h-13 text-lg font-semibold rounded-xl ${isEditing ? '' : 'gradient-festive shadow-festive'}`} disabled={!guestName.trim()}>
+        <Button onClick={handleSubmit} className={`flex-1 h-13 text-lg font-semibold rounded-xl ${isEditing ? '' : 'gradient-festive shadow-festive'}`} disabled={!guestName.trim() || !Number(amount)}>
           {isEditing ? '💾 保存修改' : '✨ 添加记录'}
         </Button>
         {isEditing && (

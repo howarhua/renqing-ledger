@@ -37,7 +37,7 @@ export default function Index() {
             </p>
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground/60">
               <Sparkles className="w-4 h-4" />
-              <span>支持婚礼、满月宴、乔迁宴等多种场景</span>
+              <span>支持婚礼、生日宴、满月宴、乔迁宴等多种场景</span>
             </div>
           </div>
         ) : (

@@ -89,6 +89,7 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="text-sm w-12">序</TableHead>
                 <TableHead className="text-base">来宾</TableHead>
                 <TableHead className="text-base">礼金</TableHead>
                 <TableHead className="text-base">礼品</TableHead>
@@ -97,8 +98,9 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(r => (
+              {filtered.map((r, i) => (
                 <TableRow key={r.id} className="animate-fade-in">
+                  <TableCell className="text-muted-foreground text-sm">{i + 1}</TableCell>
                   <TableCell className="font-medium text-base">{r.guestName}</TableCell>
                   <TableCell className="text-gold font-semibold text-base">¥{r.amount.toLocaleString()}</TableCell>
                   <TableCell>
@@ -122,11 +124,14 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filtered.map(r => (
+          {filtered.map((r, i) => (
             <Card key={r.id} className="animate-fade-in group">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
-                  <span className="font-semibold text-lg">{r.guestName}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground text-sm">#{i + 1}</span>
+                    <span className="font-semibold text-lg">{r.guestName}</span>
+                  </div>
                   {hasActions && (
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <EditButton record={r} size="sm" />

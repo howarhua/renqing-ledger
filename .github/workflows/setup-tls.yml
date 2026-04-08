@@ -1,0 +1,27 @@
+name: Setup TLS Certificate
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-tls:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > /tmp/kubeconfig
+          echo "KUBECONFIG=/tmp/kubeconfig" >> $GITHUB_ENV
+
+      - name: Create TLS secret
+        run: |
+          kubectl create secret tls ${{ secrets.TLS_SECRET_NAME }} \
+            --cert=certs/cert.pem \
+            --key=certs/key.pem \
+            --dry-run=client -o yaml | kubectl apply -f -

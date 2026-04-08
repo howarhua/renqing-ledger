@@ -1,0 +1,92 @@
+name: Build and Deploy to k3s
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY_URL: ${{ vars.REGISTRY_URL }}
+  IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p /tmp
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > /tmp/kubeconfig
+          echo "KUBECONFIG=/tmp/kubeconfig" >> $GITHUB_ENV
+
+      - name: Replace image tag in deployment
+        run: |
+          sed -i "s|REGISTRY_URL|${{ env.REGISTRY_URL }}|g" k8s/deployment.yaml
+          sed -i "s|IMAGE_NAME|${{ env.IMAGE_NAME }}|g" k8s/deployment.yaml
+          sed -i "s|TAG|${{ github.sha }}|g" k8s/deployment.yaml
+
+      - name: Replace domain in ingress
+        run: |
+          sed -i "s|HOSTNAME|${{ secrets.DOMAIN_NAME }}|g" k8s/ingress.yaml
+          sed -i "s|TLS_SECRET|${{ secrets.TLS_SECRET_NAME }}|g" k8s/ingress.yaml
+
+      - name: Deploy to k3s
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+#          kubectl apply -f k8s/service.yaml
+#          kubectl apply -f k8s/ingress.yaml
+
+      - name: Wait for deployment
+        run: kubectl rollout status deployment/cashin-app --timeout=60s
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -l app=cashin-app
+#          kubectl get ingress cashin-app

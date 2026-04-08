@@ -4,18 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Plus, Calendar as CalendarIcon } from 'lucide-react';
 import { Banquet, BanquetType, BANQUET_TYPES } from '@/types';
+import { format, parseISO } from 'date-fns';
 
 interface Props {
   onAdd: (b: Omit<Banquet, 'id' | 'createdAt'>) => void;
 }
 
 const TYPE_EMOJI: Record<string, string> = {
+  '寿宴': '🎂',
   '婚礼': '💒',
   '满月宴': '👶',
   '乔迁宴': '🏠',
-  '寿宴': '🎂',
   '升学宴': '🎓',
   '其他': '🎉',
 };
@@ -25,12 +28,12 @@ export default function CreateBanquetDialog({ onAdd }: Props) {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
-  const [type, setType] = useState<BanquetType>('婚礼');
+  const [type, setType] = useState<BanquetType>('寿宴');
 
   const handleSubmit = () => {
     if (!name.trim() || !date) return;
     onAdd({ name: name.trim(), date, location: location.trim(), type });
-    setName(''); setDate(''); setLocation(''); setType('婚礼');
+    setName(''); setDate(''); setLocation(''); setType('寿宴');
     setOpen(false);
   };
 
@@ -53,7 +56,25 @@ export default function CreateBanquetDialog({ onAdd }: Props) {
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">日期 *</Label>
-            <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="h-12 text-base rounded-xl" />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-12 text-base rounded-xl w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(parseISO(date), 'yyyy年MM月dd日') : '请选择日期'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date ? parseISO(date) : undefined}
+                  onSelect={(d) => setDate(d ? format(d, 'yyyy-MM-dd') : '')}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">地点</Label>

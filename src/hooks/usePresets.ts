@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 const GIFT_PRESETS_KEY = 'renqing_gift_presets';
 const AMOUNT_PRESETS_KEY = 'renqing_amount_presets';
 
-const DEFAULT_GIFTS = ['火炮', '杂糖', '白糖', '面'];
+const DEFAULT_GIFTS = ['火炮', '酒', '杂糖', '白糖', '烟花', '面'];
 const DEFAULT_AMOUNTS = [100, 200, 300, 500, 600, 800, 1000, 1600, 2000];
 
 function load<T>(key: string, fallback: T): T {
