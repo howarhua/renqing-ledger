@@ -22,6 +22,7 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const hasActions = !!(onEdit || onDelete);
 
   const filtered = useMemo(() => {
     let list = records;
@@ -92,7 +93,7 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
                 <TableHead className="text-base">礼金</TableHead>
                 <TableHead className="text-base">礼品</TableHead>
                 <TableHead className="text-base">备注</TableHead>
-                <TableHead className="w-20">操作</TableHead>
+                {hasActions && <TableHead className="w-20">操作</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -106,14 +107,14 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">{r.note}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => onEdit(r)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <DeleteButton id={r.id} />
-                    </div>
-                  </TableCell>
+                  {hasActions && (
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <EditButton record={r} />
+                        <DeleteButton id={r.id} />
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -126,12 +127,12 @@ export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <span className="font-semibold text-lg">{r.guestName}</span>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => onEdit(r)}>
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <DeleteButton id={r.id} size="sm" />
-                  </div>
+                  {hasActions && (
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <EditButton record={r} size="sm" />
+                      <DeleteButton id={r.id} size="sm" />
+                    </div>
+                  )}
                 </div>
                 <p className="text-gold font-bold text-xl mb-2">¥{r.amount.toLocaleString()}</p>
                 {r.gifts.length > 0 && (
