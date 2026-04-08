@@ -14,6 +14,17 @@ function save<T>(key: string, data: T[]) {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export function useBanquets() {
   const [banquets, setBanquets] = useState<Banquet[]>(() => load(BANQUETS_KEY));
   const [records, setRecords] = useState<GiftRecord[]>(() => load(RECORDS_KEY));
@@ -22,7 +33,7 @@ export function useBanquets() {
   useEffect(() => save(RECORDS_KEY, records), [records]);
 
   const addBanquet = useCallback((b: Omit<Banquet, 'id' | 'createdAt'>) => {
-    const newB: Banquet = { ...b, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+    const newB: Banquet = { ...b, id: generateId(), createdAt: new Date().toISOString() };
     setBanquets(prev => [newB, ...prev]);
     return newB;
   }, []);
@@ -37,7 +48,7 @@ export function useBanquets() {
   }, []);
 
   const addRecord = useCallback((r: Omit<GiftRecord, 'id' | 'createdAt'>) => {
-    const newR: GiftRecord = { ...r, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+    const newR: GiftRecord = { ...r, id: generateId(), createdAt: new Date().toISOString() };
     setRecords(prev => [newR, ...prev]);
     return newR;
   }, []);
