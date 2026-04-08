@@ -57,5 +57,5 @@ export function useBanquets() {
     return banquets.find(b => b.id === id);
   }, [banquets]);
 
-  return { banquets, records, addBanquet, deleteBanquet, addRecord, deleteRecord, updateRecord, getRecords, getBanquet };
+  return { banquets, records, addBanquet, deleteBanquet, freezeBanquet, addRecord, deleteRecord, updateRecord, getRecords, getBanquet };
 }
