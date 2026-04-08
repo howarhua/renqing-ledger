@@ -4,7 +4,7 @@ import CreateBanquetDialog from '@/components/CreateBanquetDialog';
 import { Scroll } from 'lucide-react';
 
 export default function Index() {
-  const { banquets, records, addBanquet, deleteBanquet, getRecords } = useBanquets();
+  const { banquets, records, addBanquet, deleteBanquet, freezeBanquet, getRecords } = useBanquets();
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,7 +33,7 @@ export default function Index() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {banquets.map(b => (
-              <BanquetCard key={b.id} banquet={b} records={getRecords(b.id)} onDelete={deleteBanquet} />
+              <BanquetCard key={b.id} banquet={b} records={getRecords(b.id)} onDelete={deleteBanquet} onFreeze={freezeBanquet} />
             ))}
           </div>
         )}
