@@ -111,19 +111,13 @@ jobs:
 
       - name: Replace MongoDB password
         run: |
-          sed -i "s|MONGODB_PASSWORD|${{ secrets.MONGODB_PASSWORD }}|g" k8s/mongodb-deployment.yaml
-
-      - name: Deploy MongoDB to k3s
-        run: kubectl apply -f k8s/mongodb-deployment.yaml
+          sed -i "s|MONGODB_PASSWORD|${{ secrets.MONGODB_PASSWORD }}|g" k8s/backend-deployment.yaml
 
       - name: Deploy Backend to k3s
         run: kubectl apply -f k8s/backend-deployment.yaml
 
       - name: Deploy Frontend to k3s
         run: kubectl apply -f k8s/frontend-deployment.yaml
-
-      - name: Wait for MongoDB deployment
-        run: kubectl rollout status deployment/mongodb --timeout=120s
 
       - name: Wait for backend deployment
         run: kubectl rollout status deployment/renqin-backend --timeout=120s
