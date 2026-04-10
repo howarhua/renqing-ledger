@@ -2,6 +2,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { useBanquets } from '@/hooks/useBanquets';
 import BanquetCard from '@/components/BanquetCard';
 import CreateBanquetDialog from '@/components/CreateBanquetDialog';
+import AddToHomeScreen from '@/components/AddToHomeScreen';
 import { Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -108,6 +109,7 @@ export default function Index() {
         )}
       </main>
 
+      <AddToHomeScreen />
     </div>
   );
 }
