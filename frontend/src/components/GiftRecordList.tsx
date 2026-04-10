@@ -22,7 +22,9 @@ interface Props {
 export default function GiftRecordList({ records, onDelete, onEdit }: Props) {
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    (typeof window !== 'undefined' && window.innerWidth < 768) ? 'card' : 'table'
+  );
   const hasActions = !!(onEdit || onDelete);
 
   const filtered = useMemo(() => {

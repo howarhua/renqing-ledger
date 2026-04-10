@@ -50,10 +50,15 @@ def doc_to_user(doc: dict) -> dict:
     created_at = doc.get("created_at")
     if isinstance(created_at, datetime):
         created_at = created_at.isoformat()
+    last_login_at = doc.get("last_login_at")
+    if isinstance(last_login_at, datetime):
+        last_login_at = last_login_at.isoformat()
     return {
         "id": str(doc["_id"]),
         "username": doc["username"],
+        "phone": doc.get("phone"),
         "created_at": created_at,
+        "last_login_at": last_login_at,
     }
 
 
@@ -93,6 +98,13 @@ class AuthService:
         if not verify_password(password, user["password_hash"]):
             return None
 
+        # 更新最近登录时间
+        await self.collection.update_one(
+            {"_id": user["_id"]},
+            {"$set": {"last_login_at": datetime.utcnow()}}
+        )
+        user["last_login_at"] = datetime.utcnow()
+
         # 创建 Token
         token = create_access_token({"sub": str(user["_id"]), "username": username})
 
@@ -118,6 +130,37 @@ class AuthService:
         if not user_id:
             return None
         return await self.get_user_by_id(user_id)
+
+    async def update_user(self, user_id: str, phone: Optional[str] = None) -> Optional[dict]:
+        """更新用户信息"""
+        if not ObjectId.is_valid(user_id):
+            return None
+        update_data = {}
+        if phone is not None:
+            update_data["phone"] = phone
+        if not update_data:
+            return await self.get_user_by_id(user_id)
+        result = await self.collection.find_one_and_update(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data},
+            return_document=True
+        )
+        return doc_to_user(result) if result else None
+
+    async def change_password(self, user_id: str, old_password: str, new_password: str) -> bool:
+        """修改密码"""
+        if not ObjectId.is_valid(user_id):
+            return False
+        user = await self.collection.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return False
+        if not verify_password(old_password, user["password_hash"]):
+            return False
+        await self.collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"password_hash": hash_password(new_password)}}
+        )
+        return True
 
 
 def get_auth_service() -> AuthService:

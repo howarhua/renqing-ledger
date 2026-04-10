@@ -168,7 +168,9 @@ export interface TokenResponse {
   user: {
     id: string;
     username: string;
+    phone?: string;
     created_at: string;
+    last_login_at?: string;
   };
 }
 
@@ -192,7 +194,24 @@ export const authApi = {
 
   /** 获取当前用户 */
   me: () =>
-    fetchJSON<{ id: string; username: string; created_at: string }>(`${API_BASE}/auth/me`),
+    fetchJSON<{ id: string; username: string; phone?: string; created_at: string; last_login_at?: string }>(`${API_BASE}/auth/me`),
+
+  /** 更新用户信息 */
+  updateProfile: (data: { phone?: string }) =>
+    fetchJSON<{ id: string; username: string; phone?: string; created_at: string }>(
+      `${API_BASE}/auth/me`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    ),
+
+  /** 修改密码 */
+  changePassword: (data: { old_password: string; new_password: string }) =>
+    fetchJSON<{ message: string }>(`${API_BASE}/auth/change-password`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 export const statisticsApi = {

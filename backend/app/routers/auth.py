@@ -9,6 +9,8 @@ from app.models.auth import (
     UserLoginRequest,
     TokenResponse,
     UserResponse,
+    UpdateUserRequest,
+    ChangePasswordRequest,
 )
 from app.services.auth_service import AuthService, get_auth_service
 from app.database import get_database
@@ -84,3 +86,39 @@ async def login(data: UserLoginRequest):
 async def get_me(current_user: dict = Depends(get_current_user)):
     """获取当前用户信息"""
     return current_user
+
+
+@router.put("/me", response_model=UserResponse)
+async def update_me(
+    data: UpdateUserRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """更新当前用户信息"""
+    service = get_auth_service()
+    user = await service.update_user(current_user["id"], phone=data.phone)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="用户不存在",
+        )
+    return user
+
+
+@router.post("/change-password")
+async def change_password(
+    data: ChangePasswordRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """修改密码"""
+    service = get_auth_service()
+    success = await service.change_password(
+        current_user["id"],
+        data.old_password,
+        data.new_password,
+    )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="原密码错误",
+        )
+    return {"message": "密码修改成功"}

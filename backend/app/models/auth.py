@@ -1,6 +1,8 @@
 """
 用户认证相关 Pydantic Schemas
 """
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -20,7 +22,9 @@ class UserResponse(BaseModel):
     """用户响应"""
     id: str
     username: str
+    phone: Optional[str] = None
     created_at: str
+    last_login_at: Optional[str] = None
 
 
 class TokenResponse(BaseModel):
@@ -28,3 +32,14 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class UpdateUserRequest(BaseModel):
+    """更新用户信息请求"""
+    phone: Optional[str] = Field(None, min_length=11, max_length=11)
+
+
+class ChangePasswordRequest(BaseModel):
+    """修改密码请求"""
+    old_password: str = Field(..., min_length=6, max_length=100)
+    new_password: str = Field(..., min_length=6, max_length=100)

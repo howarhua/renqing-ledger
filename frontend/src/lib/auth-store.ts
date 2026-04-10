@@ -8,7 +8,9 @@ import { useRemoteStore } from './remote-store';
 interface User {
   id: string;
   username: string;
+  phone?: string;
   created_at: string;
+  last_login_at?: string;
 }
 
 interface AuthState {
@@ -22,6 +24,8 @@ interface AuthState {
   register: (username: string, password: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  updateProfile: (phone: string) => Promise<void>;
+  changePassword: (oldPassword: string, newPassword: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -88,6 +92,28 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem('auth_token');
       useRemoteStore.getState().clear();
       set({ user: null, token: null, isAuthenticated: false });
+    }
+  },
+
+  updateProfile: async (phone: string) => {
+    set({ isLoading: true });
+    try {
+      const user = await authApi.updateProfile({ phone });
+      set({ user, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  changePassword: async (oldPassword: string, newPassword: string) => {
+    set({ isLoading: true });
+    try {
+      await authApi.changePassword({ old_password: oldPassword, new_password: newPassword });
+      set({ isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
     }
   },
 }));

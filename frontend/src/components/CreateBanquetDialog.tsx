@@ -41,8 +41,8 @@ export default function CreateBanquetDialog({ onAdd }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg" className="h-9 px-6 text-base gap-2 gradient-festive shadow-festive rounded-xl font-semibold">
-          <Plus className="w-5 h-5" />
+        <Button size="sm" className="h-8 sm:h-9 px-3 sm:px-5 text-xs sm:text-sm gap-1 sm:gap-2 gradient-festive shadow-festive rounded-xl font-semibold">
+          <Plus className="w-4 h-4" />
           新建宴会
         </Button>
       </DialogTrigger>

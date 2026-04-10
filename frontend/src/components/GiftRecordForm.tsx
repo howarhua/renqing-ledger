@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Settings2, X, Pencil } from 'lucide-react';
+import { Plus, Settings2, X, Pencil, Clipboard } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { GiftRecord } from '@/lib/api';
 
@@ -91,7 +91,7 @@ export default function GiftRecordForm({
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isEditing ? 'bg-primary/10' : 'gradient-festive shadow-festive'}`}>
           {isEditing
             ? <Pencil className="w-4 h-4 text-primary" />
-            : <Plus className="w-4 h-4 text-primary-foreground" />
+            : <Clipboard className="w-4 h-4 text-primary-foreground" />
           }
         </div>
         {isEditing ? '编辑记录' : '快速录入'}
