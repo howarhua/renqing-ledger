@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: renqin-backend
+  labels:
+    app: renqin-backend
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: renqin-backend
+  template:
+    metadata:
+      labels:
+        app: renqin-backend
+    spec:
+      imagePullSecrets:
+        - name: acr-pull-secret
+      containers:
+        - name: renqin-backend
+          image: REGISTRY_URL/BACKEND_IMAGE_NAME:TAG
+          ports:
+            - containerPort: 8000
+          imagePullPolicy: Always
+          env:
+            - name: MONGODB_URI
+              value: "mongodb://root:${MONGODB_PASSWORD}@localhost:27017/admin?authSource=admin"
+            - name: DATABASE_NAME
+              value: "renqing"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet

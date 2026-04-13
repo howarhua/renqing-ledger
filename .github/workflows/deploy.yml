@@ -1,0 +1,132 @@
+name: Build and Deploy to k3s
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY_URL: ${{ vars.REGISTRY_URL }}
+  FRONTEND_IMAGE_NAME: ${{ vars.FRONTEND_IMAGE_NAME }}
+  BACKEND_IMAGE_NAME: ${{ vars.BACKEND_IMAGE_NAME }}
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./frontend
+
+      - name: Build app
+        run: npm run build
+        working-directory: ./frontend
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY_URL }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
+            ${{ env.REGISTRY_URL }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ github.sha }}
+
+  build-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY_URL }}/${{ env.BACKEND_IMAGE_NAME }}:latest
+            ${{ env.REGISTRY_URL }}/${{ env.BACKEND_IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-frontend, build-backend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p /tmp
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > /tmp/kubeconfig
+          echo "KUBECONFIG=/tmp/kubeconfig" >> $GITHUB_ENV
+
+      - name: Replace image tag in frontend deployment
+        run: |
+          sed -i "s|REGISTRY_URL|${{ env.REGISTRY_URL }}|g" k8s/frontend-deployment.yaml
+          sed -i "s|FRONTEND_IMAGE_NAME|${{ env.FRONTEND_IMAGE_NAME }}|g" k8s/frontend-deployment.yaml
+          sed -i "s|TAG|${{ github.sha }}|g" k8s/frontend-deployment.yaml
+
+      - name: Replace image tag in backend deployment
+        run: |
+          sed -i "s|REGISTRY_URL|${{ env.REGISTRY_URL }}|g" k8s/backend-deployment.yaml
+          sed -i "s|BACKEND_IMAGE_NAME|${{ env.BACKEND_IMAGE_NAME }}|g" k8s/backend-deployment.yaml
+          sed -i "s|TAG|${{ github.sha }}|g" k8s/backend-deployment.yaml
+
+      - name: Replace MongoDB password
+        run: |
+          sed -i "s|MONGODB_PASSWORD|${{ secrets.MONGODB_PASSWORD }}|g" k8s/backend-deployment.yaml
+
+      - name: Deploy Backend to k3s
+        run: kubectl apply -f k8s/backend-deployment.yaml
+
+      - name: Deploy Frontend to k3s
+        run: kubectl apply -f k8s/frontend-deployment.yaml
+
+      - name: Wait for backend deployment
+        run: kubectl rollout status deployment/renqin-backend --timeout=120s
+
+      - name: Wait for frontend deployment
+        run: kubectl rollout status deployment/renqin-frontend --timeout=120s
+
+      - name: Verify deployments
+        run: |
+          kubectl get pods -l app=mongodb
+          kubectl get pods -l app=renqin-backend
+          kubectl get pods -l app=renqin-frontend
